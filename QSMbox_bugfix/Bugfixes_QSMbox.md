@@ -1,5 +1,7 @@
 Overview of bugfixes to run QSMbox on Matlab R2023b / MacOS Ventura
+
 Bugfixes might have to be adapted for other Matlab or MacOS versions.
+
 written by Bjoern Schott, 03/2024
 For questions, please email: bjoern-hendrik.schott@dzne.de
 
