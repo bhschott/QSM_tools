@@ -31,20 +31,19 @@ The same links have also been added to
 /Applications/spm/spm12/toolbox/QSMbox/master/ptb/_PhaseTools
 
 
-3. Corrected memory management in mexMGv3.cpp:
+3. Corrected memory management in mexMGv6.cpp:
 
-line 750: replaced 
+The most recent version of mexMG (v6) was not part of the QSMbox bundle and downloaded from here:
+https://github.com/nosarthur/LBV
+
+In mexMGv6.cpp, line 750: replaced 
+
 	delete mask_int; 
 with
+
 	delete[] mask_int;
 
-mexMGv3 was then compiled with mex, and in LBV.m
-
-	tmp = mexMGv6(fT,mask,matrix_size,voxel_size,tol,depth,peel,N1,N2,N3);
-was replaced with
-
-	tmp = mexMGv3(fT,mask,matrix_size,voxel_size,tol,depth,peel,N1,N2,N3);
-
+mexMGv3 was then compiled with mex.
 
 4. Corrected extraction of TE from DICOM header (m1_dicom_extract_res_B0_TE.m):
 => replace info.EchoNumber with info.EchoNumbers, if EchoNumber does not exist
