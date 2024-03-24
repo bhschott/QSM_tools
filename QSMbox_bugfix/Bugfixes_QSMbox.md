@@ -42,6 +42,7 @@ mexMGv3 was then compiled with mex, and in LBV.m
 
 	tmp = mexMGv6(fT,mask,matrix_size,voxel_size,tol,depth,peel,N1,N2,N3);
 was replaced with
+
 	tmp = mexMGv3(fT,mask,matrix_size,voxel_size,tol,depth,peel,N1,N2,N3);
 
 
