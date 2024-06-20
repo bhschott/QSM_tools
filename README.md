@@ -8,29 +8,29 @@ For theoretical background on the Multi-Scale Dipole Inversion (MSDI) algorithm 
 
 ### QSMbox_bugfix
 
-Updates and bugfixes related to the QSM processing toolbox (QSMbox).
+Bugfixes performed on QSMbox to run on Matlab R2023a on MacOS.
 
 ### defaults
 
-Default parameter files and configurations used in QSM processing scripts.
+Default QSMbox processing scripts and parameter files.
 
 ### QSM_Import
 
-Scripts and tools for importing QSM data into the processing pipeline.
+Scripts and tools for importing DICOM files, adjusting the filenames for uncombined data (i.e., images saved separately for each channel).
 
 ### QSM_lambda_est
 
-Scripts for the estimation of optimal lambda parameters for QSM calculations.
+Scripts for the estimation of optimal lambda (regularization parameter).
 
 ### QSM_estimate
 
-Scripts for estimating QSM values given a fixed lambda.
+Scripts for reconstructing QSM images given a fixed lambda.
 
 ### QSM_MVSSM
 
-Tools and scripts for generating Macro-Vessel-Suppressed Susceptibility Maps (MVSSM) from QSM data using a customized method.
+Scripts for generating Macro-Vessel-Suppressed Susceptibility Maps (MVSSM) from QSM images. Requires a high-lambda and a low-lambda QSM.
 
 ### QSM_SPM
 
-Scripts and workflows integrating SPM for preprocessing, normalization, and smoothing of QSM and MVSSM images.
+SPM preprocessing (co-registration, normalization, and smoothing) of QSM / MVSSM images.
 
