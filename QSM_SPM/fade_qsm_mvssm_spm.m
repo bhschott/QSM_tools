@@ -54,9 +54,11 @@ clean_mvssm_filename = strcat('int16_MVSSM', high_lambda_dirname(11:end), low_la
 
 
 % parameters for MVSSM generation
-std_cutoff = 1.5; % in standard deviations
-fwhm = 1.6; % voxel size * 2
-smoothed_cutoff = 0.5;
+std_cutoff = 2.5; % in standard deviations
+fwhm = 1.2; % voxel size * 1.5
+smoothed_cutoff = 0.375;
+twosided = 0; % if 1: use both positive and negative susceptibility values for mask generation
+
 
 % parameters for integer conversion
 scaling_factor = 1000;
@@ -98,7 +100,7 @@ for subject = 1 : size(dir_names,1)
         cd(qsm_spm_dir)
         % binarize high-pass (low lambda) image
         % bin_low_lambda_filename = strcat('b_', low_lambda_filename);
-        fade_qsm_calculate_mvssm(high_lambda_filename, low_lambda_filename, mvssm_filename, std_cutoff, fwhm, smoothed_cutoff);
+        fade_qsm_calculate_mvssm(high_lambda_filename, low_lambda_filename, mvssm_filename, std_cutoff, fwhm, smoothed_cutoff, twosided);
 
         % create QSM brain mask from smoothed original QSM
         fade_qsm_create_mask(high_lambda_filename, 'qsm_mask.nii', fwhm_m, num_iter);
@@ -212,4 +214,3 @@ for subject = 1 : size(dir_names,1)
 end
 
 cd(cwd)
-
