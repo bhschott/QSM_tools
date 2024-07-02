@@ -1,4 +1,4 @@
-function fade_qsm_calculate_mvssm(high_lambda_filename, low_lambda_filename, dest_filename, std_cutoff, fwhm, smoothed_cutoff)
+function fade_qsm_calculate_mvssm(high_lambda_filename, low_lambda_filename, dest_filename, std_cutoff, fwhm, smoothed_cutoff, twosided)
 % FADE_QSM_CALCULATE_MVSSM Creates macro-vessel-suppressed susceptibility mapping (MVSSM) images.
 %
 % Usage:
@@ -37,12 +37,12 @@ end
 
 % Default cut-off for masking in standard deviations
 if nargin < 4
-    std_cutoff = 2.5;
+    std_cutoff = 1.5;
 end
 
 % Default full-width at half maximum (FWHM) for Gaussian smoothing (in mm)
 if nargin < 5
-    fwhm = 0;
+    fwhm = 1.6;
 end
 
 % Default cut-off for binarizing of smoothed image
@@ -50,14 +50,19 @@ if nargin < 6
     smoothed_cutoff = 0.5;
 end
 
+% two-sided: also binarizes very low susceptibility values
+if nargin < 0
+    twosided = 0;
+end
+
 % add prefix to binary files
 [dirr fname extt] = fileparts(low_lambda_filename);
-bin_low_lambda_filename = fullfile(dirr, strcat('b_', low_lambda_filename));
+bin_low_lambda_filename = fullfile(dirr, strcat('b_', low_lambda_filename))
 ibin_low_lambda_filename = fullfile(dirr, strcat('ib_', low_lambda_filename));
 
 
 % binarize low-lambda image
-fade_qsm_binarize_image(low_lambda_filename, bin_low_lambda_filename, std_cutoff, fwhm, smoothed_cutoff);
+fade_qsm_binarize_image(low_lambda_filename, bin_low_lambda_filename, std_cutoff, fwhm, smoothed_cutoff, twosided);
 
 % invert binarized image
 invert_binary_image(bin_low_lambda_filename, ibin_low_lambda_filename);

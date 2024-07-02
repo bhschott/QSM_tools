@@ -1,4 +1,4 @@
-function fade_qsm_binarize_image(input_filename, output_filename, std_cutoff, fwhm, smoothed_cutoff)
+function fade_qsm_binarize_image(input_filename, output_filename, std_cutoff, fwhm, smoothed_cutoff, twosided)
 % FADE_QSM_BINARIZE_IMAGE Binarizes a NIFTI image based on a threshold and optionally applies Gaussian smoothing.
 %
 % Usage:
@@ -10,6 +10,7 @@ function fade_qsm_binarize_image(input_filename, output_filename, std_cutoff, fw
 %   std_cutoff        - (Optional) Scalar, threshold in terms of standard deviations above the mean (default: 2.5).
 %   fwhm              - (Optional) Scalar, full-width at half maximum (FWHM) for Gaussian smoothing in mm (default: 0, no smoothing).
 %   smoothed_cutoff   - (Optional) Scalar, threshold for binarizing the smoothed image (default: 0.5).
+%   twosided          - (Optional) Flag, also include very low susceptibility values in mask (default: 0).
 %
 % Description:
 %   This function binarizes a high-pass NIFTI image based on a threshold defined
@@ -42,6 +43,11 @@ if nargin < 5
     smoothed_cutoff = 0.5;
 end
 
+% twosided: also include very low susceptibility values in binarized mask
+if nargin < 6
+    twosided = 0;
+end
+
 % Load NIFTI image
 high_pass_img = spm_vol(input_filename);
 high_pass_data = spm_read_vols(high_pass_img);
@@ -55,7 +61,11 @@ threshold = mean_val + std_cutoff * std_val;
 disp(['Mean: ', num2str(mean_val), ', Std: ', num2str(std_val), ', Threshold: ', num2str(threshold)]);  % Debug: Display mean, std, and threshold
 
 % Create binary mask
-binary_mask = high_pass_data > threshold;
+if twosided
+    binary_mask = abs(high_pass_data) > threshold;
+else
+    binary_mask = high_pass_data > threshold;
+end
 
 % Apply Gaussian smoothing using SPM
 if fwhm > 0
@@ -84,4 +94,4 @@ spm_write_vol(final_binary_mask_img, final_binary_mask);
 delete('temp_mask.nii');
 delete('smoothed_mask.nii');
 
-end
+
