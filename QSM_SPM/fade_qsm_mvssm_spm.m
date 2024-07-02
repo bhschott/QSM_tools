@@ -27,9 +27,8 @@ function err_subs = fade_qsm_mvssm_spm
 volname = 'ArmorATD';
 scanner_name = 'skyra';
 
-% Define project, subject, tools, and DICOM directories
 project_dir = strcat('/Volumes/', volname, '/projects/FADE_2016/');
-subjects_dir = strcat(project_dir, 'subjects_', scanner_name, '/');
+subjects_dir = strcat(project_dir, 'subjects_', scanner_name, '/')
 tools_dir = strcat(project_dir, 'tools_BS/');
 switch scanner_name
     case 'verio'
@@ -40,46 +39,48 @@ switch scanner_name
         dicom_dir = strcat(project_dir, 'incoming_dicoms/dicom_skrep/');
 end
 
-% Define additional directories and filenames
+% Define additional directories
 qsm_tools_dir = strcat(tools_dir, 'QSM_tools/');
 qsm_defs_dir = strcat(qsm_tools_dir, 'defaults/');
 spm_dir = which('spm'); spm_dir = spm_dir(1:end-5);
 
+% directories and image files generated with QSMbox batch
 high_lambda_dirname = 'QSM_lambda_749';
 low_lambda_dirname = 'QSM_lambda_39_2';
 high_lambda_filename = 'qsm_INTEGRAL_2_MSDI_l749.nii';
 low_lambda_filename = 'qsm_INTEGRAL_2_MSDI_l39.nii';
 mvssm_filename = strcat('mvssm_', high_lambda_filename);
+clean_mvssm_filename = strcat('int16_MVSSM', high_lambda_dirname(11:end), low_lambda_dirname(11:end), '.nii')
 
-% Parameters for MVSSM generation
+
+% parameters for MVSSM generation
 std_cutoff = 1.5; % in standard deviations
 fwhm = 1.6; % voxel size * 2
 smoothed_cutoff = 0.5;
 
-% Parameters for integer conversion
+% parameters for integer conversion
 scaling_factor = 1000;
 
-% Parameters for mask generation
+% parameters for mask generation
 fwhm_m = 2;
 num_iter = 2;
 
-% Get subject directories
 dir_names = spm_select(Inf,'dir',subjects_dir);
 subjnames = dir_names(:,end-3:end);
 
 cwd = pwd;
 err_subs = {};
 
-% Process each subject
+% inner loop
 for subject = 1 : size(dir_names,1)
 
     clear matlabbatch dicom_list
 
-    subj_id = subjnames(subject,:);
-    disp(['Creating MVSSM and running SPM pre-processing for ' subj_id]);
+    subj_id=subjnames(subject,:);
+    disp(['Creating MVSSM and run SPM pre-processing for ' subj_id]);
 
     try
-        % Define subject-specific directories
+
         qsm_dir = strcat(subjects_dir, subj_id, '/QSM_main/');
         cd(qsm_dir)
         mkdir spm
@@ -91,27 +92,26 @@ for subject = 1 : size(dir_names,1)
         qsm_ll_dir = strcat(qsm_data_dir, low_lambda_dirname, '/');
         qsm_ll_image = strcat(qsm_ll_dir, low_lambda_filename);
 
-        % Copy QSM images to SPM directory
         copyfile(qsm_hl_image, qsm_spm_dir)
         copyfile(qsm_ll_image, qsm_spm_dir)
 
         cd(qsm_spm_dir)
-        
-        % Step 1: Calculate MVSSM image
+        % binarize high-pass (low lambda) image
+        % bin_low_lambda_filename = strcat('b_', low_lambda_filename);
         fade_qsm_calculate_mvssm(high_lambda_filename, low_lambda_filename, mvssm_filename, std_cutoff, fwhm, smoothed_cutoff);
 
-        % Step 2: Create QSM brain mask from smoothed original QSM
+        % create QSM brain mask from smoothed original QSM
         fade_qsm_create_mask(high_lambda_filename, 'qsm_mask.nii', fwhm_m, num_iter);
 
-        % Step 3: Convert MVSSM to int16 format
+        % convert MVSSM to int16 format
         i16_mvssm_filename = strcat('i16_', mvssm_filename);
         fade_qsm_convert_int16(mvssm_filename, i16_mvssm_filename, scaling_factor)
 
-        % Step 4: Mask integer MVSSM image with QSM brain mask
+        % mask integer MVSSM image with QSM brain mask
         clear matlabbatch
         matlabbatch{1}.spm.util.imcalc.input = {strcat(qsm_spm_dir, i16_mvssm_filename)
             strcat(qsm_spm_dir, 'qsm_mask.nii,1')};
-        matlabbatch{1}.spm.util.imcalc.output = 'int16_MVSSM.nii';
+        matlabbatch{1}.spm.util.imcalc.output = clean_mvssm_filename;
         matlabbatch{1}.spm.util.imcalc.outdir = {''};
         matlabbatch{1}.spm.util.imcalc.expression = 'i1.*i2';
         matlabbatch{1}.spm.util.imcalc.var = struct('name', {}, 'value', {});
@@ -119,26 +119,28 @@ for subject = 1 : size(dir_names,1)
         matlabbatch{1}.spm.util.imcalc.options.mask = 0;
         matlabbatch{1}.spm.util.imcalc.options.interp = 1;
         matlabbatch{1}.spm.util.imcalc.options.dtype = 4;
+        % run SPM job manager
         save(strcat(subj_id, 'imcalc.mat'));
         spm_jobman('run', strcat(subj_id, 'imcalc.mat'));
 
-        % Step 5: SPM normalization based on MPRAGE image and smoothing
+        % run SPM normalization based on MPRAGE image and smoothing
         clear matlabbatch
         date_dir = dir(strcat(subjects_dir, subj_id, '/20*'));
-        mpragedir = dir(strcat(subjects_dir, subj_id, '/', date_dir.name, '/dzne_MPRAGE_1iso_PAT2_ND*'));
+        mpragedir = dir(strcat(subjects_dir, subj_id, '/', date_dir.name, '/dzne_MPRAGE_1iso_PAT2_0*'));
         mpragefile = dir(strcat(subjects_dir, subj_id, '/', date_dir.name, '/', mpragedir.name, '/s20*.nii'));
         mpragefilename = strcat(subjects_dir, subj_id, '/', date_dir.name, '/', mpragedir.name, '/', mpragefile.name);
-
+        % skull stripping to improve co-registration
+        spm_skull_strip(mpragefilename, 0.95, 'str_');
+        str_mpragefilename = strcat(subjects_dir, subj_id, '/', date_dir.name, '/', mpragedir.name, '/', 'str_', mpragefile.name);
         % SPM coregister
-        matlabbatch{1}.spm.spatial.coreg.estimate.ref = {strcat(qsm_spm_dir, 'int16_MVSSM.nii,1')};
-        matlabbatch{1}.spm.spatial.coreg.estimate.source = {mpragefilename};
+        matlabbatch{1}.spm.spatial.coreg.estimate.ref = {strcat(qsm_spm_dir, clean_mvssm_filename, ',1')};
+        matlabbatch{1}.spm.spatial.coreg.estimate.source = {str_mpragefilename};
         matlabbatch{1}.spm.spatial.coreg.estimate.other = {''};
         matlabbatch{1}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'nmi';
         matlabbatch{1}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];
         matlabbatch{1}.spm.spatial.coreg.estimate.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
         matlabbatch{1}.spm.spatial.coreg.estimate.eoptions.fwhm = [7 7];
-
-        % Segmentation of MPRAGE
+        % segmentation of MPRAGE
         matlabbatch{2}.spm.spatial.preproc.channel.vols(1) = cfg_dep('Coregister: Estimate: Coregistered Images', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','cfiles'));
         matlabbatch{2}.spm.spatial.preproc.channel.biasreg = 0.001;
         matlabbatch{2}.spm.spatial.preproc.channel.biasfwhm = 60;
@@ -177,8 +179,7 @@ for subject = 1 : size(dir_names,1)
         matlabbatch{2}.spm.spatial.preproc.warp.vox = NaN;
         matlabbatch{2}.spm.spatial.preproc.warp.bb = [NaN NaN NaN
                                                       NaN NaN NaN];
-
-        % Write normalized QSM
+        % write normalized QSM
         matlabbatch{3}.spm.spatial.normalise.write.subj.def(1) = cfg_dep('Segment: Forward Deformations', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','fordef', '()',{':'}));
         matlabbatch{3}.spm.spatial.normalise.write.subj.resample = {strcat(qsm_spm_dir, 'int16_MVSSM.nii,1')};
         matlabbatch{3}.spm.spatial.normalise.write.woptions.bb = [-78 -112 -70
@@ -186,27 +187,23 @@ for subject = 1 : size(dir_names,1)
         matlabbatch{3}.spm.spatial.normalise.write.woptions.vox = [1 1 1];
         matlabbatch{3}.spm.spatial.normalise.write.woptions.interp = 7;
         matlabbatch{3}.spm.spatial.normalise.write.woptions.prefix = 'w_';
-
-        % Smooth with 4 mm FWHM
+        % smooth with 4 mm FWHM
         matlabbatch{4}.spm.spatial.smooth.data(1) = cfg_dep('Normalise: Write: Normalised Images (Subj 1)', substruct('.','val', '{}',{3}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('()',{1}, '.','files'));
         matlabbatch{4}.spm.spatial.smooth.fwhm = [4 4 4];
         matlabbatch{4}.spm.spatial.smooth.dtype = 0;
         matlabbatch{4}.spm.spatial.smooth.im = 0;
         matlabbatch{4}.spm.spatial.smooth.prefix = 's4';
-
-        % Smooth with 6 mm FWHM
+        % smooth with 6 mm FWHM
         matlabbatch{5}.spm.spatial.smooth.data(1) = cfg_dep('Normalise: Write: Normalised Images (Subj 1)', substruct('.','val', '{}',{3}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('()',{1}, '.','files'));
         matlabbatch{5}.spm.spatial.smooth.fwhm = [6 6 6];
         matlabbatch{5}.spm.spatial.smooth.dtype = 0;
         matlabbatch{5}.spm.spatial.smooth.im = 0;
         matlabbatch{5}.spm.spatial.smooth.prefix = 's6';
-
-        % Run SPM job manager for normalization and smoothing
+        % run SPM job manager
         save(strcat(subj_id, 'coreg_norm_smooth.mat'));
         spm_jobman('run', strcat(subj_id, 'coreg_norm_smooth.mat'));
 
     catch
-        % Error handling for the subject
         ers = lasterror;
         disp(['Error in subject ' subj_id])
         err_subs = [err_subs subj_id];
@@ -214,5 +211,5 @@ for subject = 1 : size(dir_names,1)
 
 end
 
-% Return to the original working directory
 cd(cwd)
+
