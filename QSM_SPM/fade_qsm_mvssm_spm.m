@@ -181,7 +181,7 @@ for subject = 1 : size(dir_names,1)
                                                       NaN NaN NaN];
         % write normalized QSM
         matlabbatch{3}.spm.spatial.normalise.write.subj.def(1) = cfg_dep('Segment: Forward Deformations', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','fordef', '()',{':'}));
-        matlabbatch{3}.spm.spatial.normalise.write.subj.resample = {strcat(qsm_spm_dir, 'int16_MVSSM.nii,1')};
+        matlabbatch{3}.spm.spatial.normalise.write.subj.resample = {strcat(qsm_spm_dir, clean_mvssm_filename, ',1')};
         matlabbatch{3}.spm.spatial.normalise.write.woptions.bb = [-78 -112 -70
             78 76 85];
         matlabbatch{3}.spm.spatial.normalise.write.woptions.vox = [1 1 1];
