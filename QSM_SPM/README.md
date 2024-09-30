@@ -16,7 +16,7 @@ The script `fade_qsm_mvssm_spm` automates the processing pipeline for Quantitati
 
 4. **MVSSM Calculation**:
    - Calls `fade_qsm_calculate_mvssm` to generate the Macro-Vessel-Suppressed Susceptibility Map (MVSSM) using the high and low lambda QSM images.
-   - The function applies a standard deviation cutoff and smooths the images before calculating the MVSSM.
+   - The function applies a standard deviation cutoff and smoothes the images before calculating the MVSSM.
 
 5. **Mask Creation**:
    - Calls `fade_qsm_create_mask` to create a binary mask from the high lambda QSM image.
@@ -24,9 +24,10 @@ The script `fade_qsm_mvssm_spm` automates the processing pipeline for Quantitati
 
 6. **Integer Conversion**:
    - Calls `fade_qsm_convert_int16` to convert the MVSSM image to int16 format, applying a scaling factor.
+   - This is necessary for SPM image calculationand coregistration, which cannot handle NIFTI images of different numeric formats.
 
 7. **Masking MVSSM Image**:
-   - Uses SPM's `imcalc` utility to apply the binary mask to the int16 MVSSM image, producing a masked MVSSM image.
+   - Uses SPM's `imcalc` function to apply the binary mask to the int16 MVSSM image, producing a masked MVSSM image.
 
 8. **SPM Normalization and Smoothing**:
    - Coregisters the subject's MPRAGE image with the masked MVSSM image using SPM.
