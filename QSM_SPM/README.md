@@ -30,12 +30,13 @@ The script `fade_qsm_mvssm_spm` automates the processing pipeline for Quantitati
    - Uses SPM's `imcalc` function to apply the binary mask to the int16 MVSSM image, producing a masked MVSSM image.
 
 8. **SPM Normalization and Smoothing**:
+   - Skull-strips the subject's MPRAGE image to improve coregistration. Omitting skull-stripping may result in poor coregistration results.
    - Coregisters the subject's MPRAGE image with the masked MVSSM image using SPM.
    - Segments the coregistered MPRAGE image.
    - Normalizes the masked MVSSM image to MNI space using the deformation fields obtained from segmentation.
    - Applies two levels of Gaussian smoothing (4 mm and 6 mm FWHM) to the normalized MVSSM image.
 
-9. **Error Handling**:
+10. **Error Handling**:
    - Catches any errors that occur during the processing of a subject and records the subject ID in an error log.
 
 ### Functions Used
