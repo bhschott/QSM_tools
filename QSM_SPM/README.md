@@ -41,15 +41,18 @@ The script `fade_qsm_mvssm_spm` automates the processing pipeline for Quantitati
 
 ### Functions Used
 
-1. **fade_qsm_calculate_mvssm**:
+1. **spm_skull_strip**:
+   - Removes skull and face from the MPRAGE anatomical images using SPM's segmentation algorithm.
+     
+2. **fade_qsm_calculate_mvssm**:
    - Generates the MVSSM image from high and low lambda QSM images.
    - Applies a standard deviation cutoff and smoothing to the images before calculating the MVSSM.
 
-2. **fade_qsm_create_mask**:
+3. **fade_qsm_create_mask**:
    - Creates a binary mask from the high lambda QSM image.
    - Iteratively smooths and binarizes the image to generate a robust mask.
 
-3. **fade_qsm_convert_int16**:
+4. **fade_qsm_convert_int16**:
    - Converts the MVSSM image to int16 format.
    - Applies a scaling factor to maintain the dynamic range of the image.
 
