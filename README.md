@@ -1,6 +1,6 @@
 # QSM Processing Pipeline with QSMbox and SPM
 
-This repository contains scripts and tools for processing Quantitative Susceptibility Mapping (QSM) data using QSMbox and Statistical Parametric Mapping (SPM). The scripts are designed to work in conjunction with the [QSMbox toolbox](https://gitlab.com/acostaj/QSMbox) and [SPM12 software](https://www.fil.ion.ucl.ac.uk/spm/software/spm12/).
+This repository contains scripts and tools for processing Quantitative Susceptibility Mapping (QSM) data using QSMbox and Statistical Parametric Mapping (SPM). The scripts are designed to work in conjunction with the [QSMbox toolbox](https://gitlab.com/acostaj/QSMbox) and [SPM12 software](https://www.fil.ion.ucl.ac.uk/spm/software/spm12/). For multimodal analysis (e.g., QSM with VBM data as voxel-wise covariate), the [MMA toolbox](https://github.com/JoramSoch/MMA) is required.
 
 For theoretical background on the Multi-Scale Dipole Inversion (MSDI) algorithm implemented in QSMbox and on the Macro-Vessel-Suppressed Susceptibility Mapping (MVSSM) contrast, please see Acosta-Cabronero et al., 2018: [DOI: 10.1016/j.neuroimage.2018.07.065](https://doi.org/10.1016/j.neuroimage.2018.07.065).
 
