@@ -1,5 +1,5 @@
 function fade_qsm_get_available_subjects(volname)
-% FADE_QSM_GET_AVAILABLE_SUBJECTS generates an overview PDF of QSM images for subjects.
+% FADE_QSM_GET_AVAILABLE_SUBJECTS generates an tab-separated text file of subjects with available QSM images.
 %
 %   fade_qsm_get_available_subjects(volname)
 %
