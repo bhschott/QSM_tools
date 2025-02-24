@@ -35,6 +35,10 @@ The script `fade_qsm_mvssm_spm` automates the processing pipeline for Quantitati
    - Segments the coregistered MPRAGE image.
    - Normalizes the masked MVSSM image to MNI space using the deformation fields obtained from segmentation.
    - Applies two levels of Gaussian smoothing (4 mm and 6 mm FWHM) to the normalized MVSSM image.
+  
+9. **SPM group stats**
+   - Performs group statistics (e.g., young vs. older participants) using SPM second level.
+   - If covarying for other modality (e.g., GMV) is warranted, use MMA (by J. Soch)
 
 10. **Error Handling**:
    - Catches any errors that occur during the processing of a subject and records the subject ID in an error log.
